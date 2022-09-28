@@ -1,5 +1,5 @@
 from django.urls import reverse, resolve
-from recipes import views
+from recipes.views import site
 from .test_recipe_base import RecipeTestBase
 # from unittest import skip
 
@@ -36,5 +36,5 @@ class RecipeCategoryViewTest(RecipeTestBase):
 
     def test_recipe_category_view_function_is_correct(self):
         view = resolve(reverse('recipes:category', args=(1,)))
-        self.assertIs(view.func.view_class, views.RecipeListViewCategory)
+        self.assertIs(view.func.view_class, site.RecipeListViewCategory)
 

@@ -37,21 +37,21 @@ class RecipeModelTest(RecipeTestBase):
         with self.assertRaises(ValidationError):
             self.recipe.full_clean()
 
-    def test_recipe_preparation_steps_is_html_is_false_by_default(self):
-        recipe = self.make_recipe_no_defaults()
+    # def test_recipe_preparation_steps_is_html_is_false_by_default(self):
+    #     recipe = self.make_recipe_no_defaults()
 
-        self.assertFalse(
-            recipe.preparation_steps_is_html,
-            msg='Recipe preparation_steps_is_html is not False'
-        )
+    #     self.assertFalse(
+    #         recipe.preparation_steps_is_html,
+    #         msg='Recipe preparation_steps_is_html is not False'
+    #     )
 
-    def test_recipe_is_published_is_false_by_default(self):
-        recipe = self.make_recipe_no_defaults()
+    # def test_recipe_is_published_is_false_by_default(self):
+    #     recipe = self.make_recipe_no_defaults()
 
-        self.assertFalse(
-            recipe.is_published,
-            msg='Recipe is_published is not False'
-        )
+    #     self.assertFalse(
+    #         recipe.is_published,
+    #         msg='Recipe is_published is not False'
+    #     )
     
     def test_recipe_string_representation(self):
         self.recipe.title = 'Testing Represetation'
