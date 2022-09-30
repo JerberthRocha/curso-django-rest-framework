@@ -8,15 +8,18 @@ from tag.models import Tag
 from ..serializers import TagSerializer
 
 
-@api_view()
+@api_view(http_method_names=['get', 'post'])
 def recipe_api_list(request):
-    recipes = Recipe.objects.get_published()[:5]
-    serializer = RecipeSerializer(
-        instance=recipes, 
-        many=True,
-        context={'request': request},
-    )
-    return Response(serializer.data)
+    if request.method == 'GET':
+        recipes = Recipe.objects.get_published()[:5]
+        serializer = RecipeSerializer(
+            instance=recipes, 
+            many=True,
+            context={'request': request},
+        )
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        return Response('POST', status.HTTP_201_CREATED)
 
 
 @api_view()
