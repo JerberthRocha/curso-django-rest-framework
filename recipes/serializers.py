@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -23,7 +24,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'preparation', 'category', 'author', 'tags',
             'tag_objects', 'tag_links',
 
-            ]
+        ]
 
     id = serializers.IntegerField()
     title = serializers.CharField(max_length=65)
@@ -46,3 +47,27 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_preparation(self, recipe):
         return f'{recipe.preparation_time} {recipe.preparation_time_unit}'
+
+    def validate(self, attrs):
+        super_validate = super().validate(attrs)
+
+        title = attrs.get('title')
+        description = attrs.get('description')
+
+        if title == description:
+            raise serializers.ValidationError(
+                {
+                    "title": ["posso", "ter", "mais de um erro"],
+                    "description": ["posso", "ter", "mais de um erro"],
+                }
+            )
+
+        return super_validate
+
+    def validate_title(self, value):
+        title = value
+
+        if len(title) < 5:
+            raise serializers.ValidationError('Must have at least 5 chars')
+
+        return title
