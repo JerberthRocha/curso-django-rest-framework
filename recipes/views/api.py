@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from tag.models import Tag
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -46,44 +46,48 @@ class RecipeAPIv2List(ListCreateAPIView):
     #     )
 
 
-class RecipeAPIv2Detail(APIView):
-    def get_recipe(self, pk):
-        recipe = get_object_or_404(
-            Recipe.objects.get_published(),
-            pk=pk
-        )
-        return recipe
+class RecipeAPIv2Detail(RetrieveUpdateDestroyAPIView):
+    queryset = Recipe.objects.get_published()
+    serializer_class = RecipeSerializer
+    pagination_class = PageNumberPagination
 
-    def get(self, request, pk):
-        recipe = self.get_recipe(pk)
-        serializer = RecipeSerializer(
-            instance=recipe,
-            context={'request': request},
-        )
-        return Response(serializer.data)
+    # def get_recipe(self, pk):
+    #     recipe = get_object_or_404(
+    #         Recipe.objects.get_published(),
+    #         pk=pk
+    #     )
+    #     return recipe
 
-    def patch(self, request, pk):
-        recipe = self.get_recipe(pk)
-        serializer = RecipeSerializer(
-            instance=recipe,
-            data=request.data,
-            many=False,
-            context={'request': request},
-            partial=True,
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    # def get(self, request, pk):
+    #     recipe = self.get_recipe(pk)
+    #     serializer = RecipeSerializer(
+    #         instance=recipe,
+    #         context={'request': request},
+    #     )
+    #     return Response(serializer.data)
 
-        return Response(
-            serializer.data
-        )
+    # def patch(self, request, pk):
+    #     recipe = self.get_recipe(pk)
+    #     serializer = RecipeSerializer(
+    #         instance=recipe,
+    #         data=request.data,
+    #         many=False,
+    #         context={'request': request},
+    #         partial=True,
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
 
-    def delete(self, request, pk):
-        recipe = self.get_recipe(pk)
-        recipe.delete()
-        return Response(
-            status=status.HTTP_204_NO_CONTENT
-        )
+    #     return Response(
+    #         serializer.data
+    #     )
+
+    # def delete(self, request, pk):
+    #     recipe = self.get_recipe(pk)
+    #     recipe.delete()
+    #     return Response(
+    #         status=status.HTTP_204_NO_CONTENT
+    #     )
 
 
 @api_view()
