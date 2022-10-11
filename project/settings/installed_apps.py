@@ -8,6 +8,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # DJANGO REST FRAMEWORK
     'rest_framework',
+    'rest_framework_simplejwt',
     # APPS CRIADOS/REGISTRADOS PELO DESENVOLVEDOR
     'recipes',
     'authors',
