@@ -11,10 +11,15 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
 
+
+class RecipeAPIv2Pagination(PageNumberPagination):
+    page_size = 3
+
+
 class RecipeAPIv2ViewSet(ModelViewSet):
     queryset = Recipe.objects.get_published()
     serializer_class = RecipeSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = RecipeAPIv2Pagination
     permission_classes = [IsAuthenticatedOrReadOnly, ]
     http_method_names = ['get', 'options', 'head', 'patch', 'post', 'delete']
 
@@ -38,7 +43,7 @@ class RecipeAPIv2ViewSet(ModelViewSet):
             qs = qs.filter(category_id=category_id)
 
         return qs
-    
+
     def get_object(self):
         pk = self.kwargs.get('pk', '')
 
@@ -50,23 +55,24 @@ class RecipeAPIv2ViewSet(ModelViewSet):
         self.check_object_permissions(self.request, obj)
 
         return obj
-    
+
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE']:
             return [IsOwner(), ]
         return super().get_permissions()
-    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        serializer.save(author=request.user )
+        serializer.save(author=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(
-            serializer.data, 
-            status=status.HTTP_201_CREATED, 
+            serializer.data,
+            status=status.HTTP_201_CREATED,
             headers=headers
         )
+
 
 @api_view()
 def tag_api_detail(request, pk):
