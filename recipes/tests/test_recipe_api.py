@@ -1,3 +1,4 @@
+from unicodedata import category
 from rest_framework import test
 from recipes.tests.test_recipe_base import RecipeMixin
 from django.urls import reverse
@@ -5,8 +6,8 @@ from unittest.mock import patch
 
 
 class RecipeAPIv2Test(test.APITestCase, RecipeMixin):
-    def get_recipe_api_list(self):
-        api_url = reverse('recipes:recipes-api-list')
+    def get_recipe_api_list(self, reverse_result=None):
+        api_url = reverse_result or reverse('recipes:recipes-api-list')
         response = self.client.get(api_url)
         return response
 
@@ -43,4 +44,35 @@ class RecipeAPIv2Test(test.APITestCase, RecipeMixin):
         self.assertEqual(
             len(response.data.get('results')), 
             1
+        )
+
+
+    @patch('recipes.views.api.RecipeAPIv2Pagination.page_size', new=10)
+    def test_recipe_api_lists_can_load_recipes_by_category_id(self):
+        # CREATE CATEGORIES
+        category_wanted = self.make_category(name='WANTED_CATEGORY')
+        category_not_wanted = self.make_category(name='NOT_WANTED_CATEGORY')
+
+        # CREATE 10 RECIPES
+        recipes = self.make_recipe_in_batch(qtd=10)
+
+        # CHANGE ALL RECIPES TO WANTED CATEGORY
+        for recipe in recipes:
+            recipe.category = category_wanted
+            recipe.save()
+        
+        # CHANGE ONE RECIPE TO THE NOT WANTED CATEGORY
+        # AS A RESULT, THIS RECIPE SHOULD NOT SHOW IN THE PAGE
+        recipes[0].category = category_not_wanted
+        recipes[0].save()
+        
+        # ACTION: GET RECIPES BY WANTED CATEGORY_ID
+        api_url = reverse('recipes:recipes-api-list') + \
+            f'?category_id={category_wanted.id}'
+        response = self.get_recipe_api_list(reverse_result=api_url)
+
+        # WE SHOULD ONLY SEE RECIPES FROM THE WANTED CATEGORY
+        self.assertEqual(
+            len(response.data.get('results')),
+            9
         )
