@@ -15,6 +15,22 @@ class RecipeAPIv2Test(test.APITestCase, RecipeMixin):
         response = self.client.get(api_url)
         return response
 
+    def get_jwt_access_token(self):
+        userdata = {
+            'username': 'user',
+            'password': 'password'
+        }
+        self.make_author(
+            username=userdata.get('username'),
+            password=userdata.get('password')
+        )
+
+        response = self.client.post(
+            reverse('recipes:token_obtain_pair'), 
+            data={**userdata}
+        )
+        return response.data.get('access')
+
     def test_recipe_api_list_returns_status_code_200(self):
         response = self.get_recipe_api_list()
         self.assertEqual(
@@ -46,10 +62,9 @@ class RecipeAPIv2Test(test.APITestCase, RecipeMixin):
         response = self.get_recipe_api_list()
 
         self.assertEqual(
-            len(response.data.get('results')), 
+            len(response.data.get('results')),
             1
         )
-
 
     @patch('recipes.views.api.RecipeAPIv2Pagination.page_size', new=10)
     def test_recipe_api_lists_can_load_recipes_by_category_id(self):
@@ -64,12 +79,12 @@ class RecipeAPIv2Test(test.APITestCase, RecipeMixin):
         for recipe in recipes:
             recipe.category = category_wanted
             recipe.save()
-        
+
         # CHANGE ONE RECIPE TO THE NOT WANTED CATEGORY
         # AS A RESULT, THIS RECIPE SHOULD NOT SHOW IN THE PAGE
         recipes[0].category = category_not_wanted
         recipes[0].save()
-        
+
         # ACTION: GET RECIPES BY WANTED CATEGORY_ID
         api_url = reverse('recipes:recipes-api-list') + \
             f'?category_id={category_wanted.id}'
@@ -88,3 +103,6 @@ class RecipeAPIv2Test(test.APITestCase, RecipeMixin):
             response.status_code,
             401
         )
+
+    def test_jwt_login(self):
+        print(self.get_jwt_access_token())
